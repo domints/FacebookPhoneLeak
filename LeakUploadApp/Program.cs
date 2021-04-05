@@ -18,7 +18,7 @@ namespace LeakUploadApp
         static byte[] salt;
         static async Task Main(string[] args)
         {
-            if(args.Length < 1 || !File.Exists(args[0]))
+            if (args.Length < 1 || !File.Exists(args[0]))
             {
                 Console.WriteLine("You need to provide file name!");
                 return;
@@ -38,7 +38,7 @@ namespace LeakUploadApp
             collectionName = string.IsNullOrWhiteSpace(inputCollectionName) ? collectionName : inputCollectionName;
             var selectedCollection = collections.Find(c => string.Equals(c.Name, collectionName.Trim(), StringComparison.InvariantCultureIgnoreCase));
             var collectionId = -1;
-            if(selectedCollection == null)
+            if (selectedCollection == null)
             {
                 collectionId = await PostAsync<int>("admin/collection", collectionName.Trim()).ConfigureAwait(false);
             }
@@ -49,13 +49,13 @@ namespace LeakUploadApp
 
             Console.WriteLine($"Going with collection Id:{collectionId}");
 
-            long lastLineNo = 0; 
-            long currentLineNo = 0;
+            long lastRecordNo = 0;
+            long currentRecordNo = 0;
 
             Console.WriteLine("Which line to start from? [0]: ");
             var lineToStart = Console.ReadLine();
             if (long.TryParse(lineToStart, out var iLineToStart))
-                lastLineNo = iLineToStart;
+                lastRecordNo = iLineToStart;
 
             salt = Encoding.ASCII.GetBytes(await client.GetStringAsync("search/publicSalt").ConfigureAwait(false));
             List<InsertEntry> currentBatch = new();
@@ -63,29 +63,53 @@ namespace LeakUploadApp
             {
                 await PostAsync($"admin/collection/{collectionId}/entries", currentBatch).ConfigureAwait(false);
                 currentBatch.Clear();
-                var msg = $"{lastLineNo} - {currentLineNo - 1}";
+                var msg = $"{lastRecordNo} - {currentRecordNo - 1}";
                 await File.WriteAllTextAsync("status.txt", msg).ConfigureAwait(false);
                 Console.WriteLine(msg);
-                lastLineNo = currentLineNo;
+                lastRecordNo = currentRecordNo;
             }
 
             StreamReader facebook = new(args[0]);
-            string line;
-            while ((line = facebook.ReadLine()) != null)
+            string line = null;
+
+            while ((line == null ? line = facebook.ReadLine() : line += facebook.ReadLine()) != null)
             {
-                if(currentLineNo < iLineToStart)
+                var fieldCount = line.Count(ch => ch == ':');
+                if (fieldCount < 16)
                 {
-                    currentLineNo++;
+                    Console.WriteLine("Partial record, skipping.");
+                    line = line.Trim() + " ";
                     continue;
                 }
 
-                currentBatch.Add(PrepareEntry(line));
-                currentLineNo++;
-                if(currentBatch.Count >= 1000)
+                if (fieldCount > 16)
+                    throw new InvalidOperationException($"Too many fields. {fieldCount}, {currentRecordNo}");
+
+                if (currentRecordNo < iLineToStart)
+                {
+                    currentRecordNo++;
+                    line = null;
+                    continue;
+                }
+
+                try
+                {
+
+                    currentBatch.Add(PrepareEntry(line));
+                }
+                catch
+                {
+                    Console.WriteLine($"Crash at line {currentRecordNo}");
+                    throw;
+                }
+                currentRecordNo++;
+                line = null;
+
+                if (currentBatch.Count >= 1000)
                     await upload().ConfigureAwait(false);
             }
 
-            if(currentBatch.Count > 0)
+            if (currentBatch.Count > 0)
                 await upload().ConfigureAwait(false);
         }
 
@@ -112,9 +136,9 @@ namespace LeakUploadApp
             return Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 data,
                 salt,
-                KeyDerivationPrf.HMACSHA512,
-                100,
-                64));
+                KeyDerivationPrf.HMACSHA256,
+                500,
+                32));
         }
 
         protected static async Task<T> PostAsync<T>(string url, object body)
@@ -123,7 +147,8 @@ namespace LeakUploadApp
             var content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
             var httpResponse = await client.PostAsync(url, content).ConfigureAwait(false);
             var responseString = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            try {
+            try
+            {
                 return JsonConvert.DeserializeObject<T>(responseString);
             }
             catch
@@ -147,7 +172,8 @@ namespace LeakUploadApp
         {
             var httpResponse = await client.GetAsync(url).ConfigureAwait(false);
             var responseString = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            try {
+            try
+            {
                 return JsonConvert.DeserializeObject<T>(responseString);
             }
             catch
@@ -163,7 +189,8 @@ namespace LeakUploadApp
             var content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
             var httpResponse = await client.PutAsync(url, content).ConfigureAwait(false);
             var responseString = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            try {
+            try
+            {
                 return JsonConvert.DeserializeObject<T>(responseString);
             }
             catch
@@ -178,7 +205,8 @@ namespace LeakUploadApp
         {
             var httpResponse = await client.DeleteAsync(url).ConfigureAwait(false);
             var responseString = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            try {
+            try
+            {
                 return JsonConvert.DeserializeObject<T>(responseString);
             }
             catch

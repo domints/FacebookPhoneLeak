@@ -1,8 +1,119 @@
 <html>
-    <head>
-        <title>Test</title>
-    </head>
-    <body>
-        Test.
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Facebook leak search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="jumbotron mb-0" style="min-height: 100vh;">
+        <h1>Check if recent Facebook phone number leak contains your data</h1>
+        <div class="alert alert-info mt-3" role="alert">
+            All info you provide on this site is hashed in your browser before sending out. I will never know what
+            you've put there.
+            Feel free to check the source code at: <a
+                href="https://github.com/domints/FacebookPhoneLeak">https://github.com/domints/FacebookPhoneLeak</a>
+        </div>
+        <div class="row mt-1 mb-3">
+            <div class="col-xs-12 col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Check by phone number</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">In progress</h6>
+                        <p class="card-text">Enter phone number (with country code!) to check if it exists in the
+                            database</p>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="phoneNumber" placeholder="Phone number...">
+                        </div>
+                        <a href="#" class="btn btn-primary" onclick="checkPhone()">Check</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Check by facebook profile ID</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">In progress</h6>
+                        <p class="card-text">Enter profile id to check if it exists in the database</p>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="profileId" placeholder="Profile ID...">
+                        </div>
+                        <a href="#" class="btn btn-primary" onclick="checkId()">Check</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="result-warning" style="display: none;" class="alert alert-warning">I found your data in the database,
+            but no very sensitive data (like
+            birthdate or e-mail) found. Watch out for scammer though!</div>
+        <div id="result-danger" style="display: none;" class="alert alert-danger">I found your data in the database
+            containing sensitive data! Watch out for
+            scammers, they might sound convincing!</div>
+        <div id="result-clean" style="display: none;" class="alert alert-success">I didn't find your data in the
+            database. You're kind of safe - your data
+            might be leaked somewhere else!</div>
+        <div class="card mt-2" id="result-card" style="display: none;">
+            <div class="card-body">
+                <h4>Does database contain following data?</h4>
+                <div class="spinner-border" id="result-spinner" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="table-responsive" id="result-table" style="display: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Living in</th>
+                                <th>Coming from</th>
+                                <th>Relationship status</th>
+                                <th>Workplace</th>
+                                <th>Email</th>
+                                <th>Birthdate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="hasName"></td>
+                                <td id="hasGender"></td>
+                                <td id="hasLivingPlace"></td>
+                                <td id="hasComingPlace"></td>
+                                <td id="hasRelationshipStatus"></td>
+                                <td id="hasWorkplace"></td>
+                                <td id="hasEmail"></td>
+                                <td id="hasBirthDate"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-2">
+            <div class="card-body">
+                <div id="region-container" style="display: none;">
+                    <h3>Already imported regions:</h3>
+                    <div class="row" id="regionList">
+
+                    </div>
+                </div>
+                <div class="spinner-border" id="region-spinner" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"
+        integrity="sha384-LtrjvnR4Twt/qOuYxE721u19sVFLVSA4hf/rRt6PrZTmiPltdZcI7q7PXQBYTKyf"
+        crossorigin="anonymous"></script>
+    <script src="sjcl.js"></script>
+    <script src="script.js"></script>
+</body>
+
 </html>

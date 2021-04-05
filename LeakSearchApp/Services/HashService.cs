@@ -22,7 +22,7 @@ namespace LeakSearchApp.Services
                 publicHash,
                 saltBytes,
                 KeyDerivationPrf.HMACSHA512,
-                100,
+                500,
                 64);
         }
     }

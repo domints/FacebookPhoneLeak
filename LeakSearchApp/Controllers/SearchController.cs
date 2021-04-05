@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using LeakSearchApp.Config;
 using LeakSearchApp.Database;
 using LeakSearchApp.Models;
 using LeakSearchApp.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace LeakSearchApp.Controllers
@@ -38,11 +40,12 @@ namespace LeakSearchApp.Controllers
         [HttpGet("collections")]
         public IEnumerable<string> GetCollections()
         {
-            return _cx.Collections.Select(c => c.Name);
+            var collections = _cx.Collections.ToList();
+            return collections.Select(c => c.Name);
         }
 
         [HttpPost("byPhone")]
-        public SearchResultModel SearchByPhoneNumber(string hash)
+        public SearchResultModel SearchByPhoneNumber([FromBody] string hash)
         {
             if(string.IsNullOrWhiteSpace(hash))
                 return null;
@@ -51,7 +54,7 @@ namespace LeakSearchApp.Controllers
         }
 
         [HttpPost("byFacebookId")]
-        public SearchResultModel SearchByFacebookId(string hash)
+        public SearchResultModel SearchByFacebookId([FromBody] string hash)
         {
             if(string.IsNullOrWhiteSpace(hash))
                 return null;
