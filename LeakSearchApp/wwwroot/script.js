@@ -9,8 +9,7 @@ checkPhone = () => {
             url: "/api/search/byPhone",
             data: JSON.stringify(hash),
             contentType: 'text/json',
-            success: function (data, textStatus, jqXHR) {
-                console.log(data, textStatus, jqXHR);
+            success: function (data) {
                 setupResult(data);
             },
             dataType: 'json'
@@ -22,10 +21,10 @@ checkId = () => {
     let hash = getHash(value);
     resetResult();
     $.post({
-        url: "/api/search/byId",
+        url: "/api/search/byFacebookId",
         data: JSON.stringify(hash),
         contentType: 'text/json',
-        success: function (data, textStatus, jqXHR) {
+        success: function (data) {
             setupResult(data);
         },
         dataType: 'json'
@@ -89,7 +88,7 @@ getHash = (value) => {
 
 $(function() {
     $.get("api/search/publicSalt",
-        function (data, textStatus, jqXHR) {
+        function (data) {
             publicSalt = data;
         }
     );

@@ -13,7 +13,7 @@ namespace LeakUploadApp
 {
     class Program
     {
-        const string API_URL = "http://localhost:5000/api/";
+        const string API_URL = "http://facebook-leak.dszymanski.pl/api/";
         static HttpClient client;
         static byte[] salt;
         static async Task Main(string[] args)
@@ -33,7 +33,7 @@ namespace LeakUploadApp
 
             var collections = await GetAsync<List<Collection>>("admin/collections").ConfigureAwait(false);
             var collectionName = Path.GetFileNameWithoutExtension(args[0]);
-            Console.Write("Please provide collection name: ");
+            Console.Write($"Please provide collection name: [{collectionName}]");
             var inputCollectionName = Console.ReadLine().Trim();
             collectionName = string.IsNullOrWhiteSpace(inputCollectionName) ? collectionName : inputCollectionName;
             var selectedCollection = collections.Find(c => string.Equals(c.Name, collectionName.Trim(), StringComparison.InvariantCultureIgnoreCase));
